@@ -206,25 +206,87 @@
 
 <body>
   <header>
-    <h1>短链生成器</h1>
+    <h1><span data-i18n="title"></span></h1>
   </header>
   <main x-data="app" x-cloak>
     <p x-show.transition.opacity="alert" :class="alert?.type" x-text="alert?.message"></p>
-    <input placeholder="输入要缩短的网址..." x-model="url" x-ref="url" />
+    <input data-i18n-placeholder="url_input_placeholder" x-model="url" x-ref="url" />
     <details>
-      <summary>自定义设置</summary>
+      <summary><span data-i18n="settings"></span></summary>
       <div>
-        <input placeholder="slug" x-model="slug" />
-        <small>不设置则随机生成 slug</small>
+        <input placeholder=" slug" x-model="slug" />
+        <small><span data-i18n="random-notice"></span></small>
       </div>
     </details>
-    <button :class="{ loading }" :disabled="loading || isValidated()" @click="submit($refs, $nextTick)">生成</button>
+    <button :class="{ loading }" :disabled="loading || isValidated()" @click="submit($refs, $nextTick)"><span
+        data-i18n="generate"></span></button>
   </main>
   <footer>
-    <p>基于 <a href="https://cloudflare.com/" target="_blank">Cloudflare</a> 的短链生成器</p>
-    <p><a href="https://github.com/Davidasx/linklet/">开源项目</a></p>
+    <p><span data-i18n="base-1"></span><a href="https://cloudflare.com/" target="_blank">Cloudflare</a><span
+        data-i18n="base-2"></span></p>
+    <p><a href="https://github.com/Davidasx/linklet/"><span data-i18n="foss"></a></p>
   </footer>
   <script src="asset/js/alpine.js"></script>
+  <script>
+    const i18n = {
+      'en': {
+        'title': 'URL Shortener',
+        'settings': 'Custim settings',
+        'random-notice': 'Generates random slug if not specified',
+        'generate': "Generate Link",
+        'base-1': 'An URL shortener powered by ',
+        'base-2': '.',
+        'foss': 'Open source project',
+        'url_input_placeholder': 'Enter the URL to shorten...'
+      },
+      'zh': {
+        'title': '短链生成器',
+        'settings': '自定义设置',
+        'random-notice': '不设置则随机生成 slug',
+        'generate': "生成",
+        'base-1': '基于 ',
+        'base-2': ' 的短链生成器',
+        'foss': '开源项目',
+        'url_input_placeholder': '输入要缩短的网址...'
+      }
+    }
+
+
+    function detectBrowserLanguage() {
+      const browserLang = navigator.language || navigator.userLanguage;
+      return browserLang.startsWith('zh') ? 'zh' : 'en';
+    }
+
+    let currentLang = localStorage.getItem('language') || detectBrowserLanguage();
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      localStorage.setItem('language', currentLang);
+      updateContent();
+    }
+
+    function updateContent() {
+      document.title = i18n[currentLang]['title'];
+
+      const elements = document.querySelectorAll('[data-i18n]');
+      elements.forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (i18n[currentLang][key]) {
+          element.textContent = i18n[currentLang][key];
+        }
+      });
+
+      const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+      placeholderElements.forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        if (i18n[currentLang][key]) {
+          element.setAttribute('placeholder', i18n[currentLang][key]);
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', updateContent);
+  </script>
   <script>
     const app = {
       url: '',
